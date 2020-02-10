@@ -159,7 +159,7 @@ The plant collides with the table it is sitting on, then the plant collides with
 
 Here's how we can create a new "Ground" tag and apply it to all our floor objects:
 
-![](./tagging.gif)
+![](./tagging-ground.gif)
 
 Now if we modify that script to use a conditional:
 
