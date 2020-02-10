@@ -157,7 +157,7 @@ plantSmall1 just hit floorFull
 
 The plant collides with the table it is sitting on, then the plant collides with the tomato projectile and then the plant collides with the floor after it falls off the table. We only care about that last collision, so we need some to filter our collision. We _could_ use the name, but we probably have different named objects that could count as the ground (e.g. "floorFull (1)", "floorFull (2)", "rugRounded"). A better solution is to use the tagging system built in to Unity. With tags, we can label a whole bunch of objects as "ground" and then we can check the tag in `OnCollisionEnter`.
 
-Here's how we can create a new "Ground" tag and apply it to one of the plants on the table:
+Here's how we can create a new "Ground" tag and apply it to all our floor objects:
 
 ![](./tagging.gif)
 
@@ -201,7 +201,7 @@ private void OnCollisionEnter(Collision collision)
 }
 ```
 
-Make sure to set the "Cloud Particles" field in the inspector. When you test and run, the plant should disappear into a puff of smoke. Duplicate the plant a few times in your scene (CTRL + D), so that there are bunch on the table. Each should be able to be knocked off and destroyed now.
+Make sure to set the "cloudParticles" field in the inspector. When you test and run, the plant should disappear into a puff of smoke. Duplicate the plant a few times in your scene, so that there are bunch on the table. Each should be able to be knocked off and destroyed now.
 
 ## Extensions
 
