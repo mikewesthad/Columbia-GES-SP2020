@@ -13,9 +13,20 @@ The version of the game from the tutorial might look like:
 
 ![](./demo-optimized.gif)
 
+## Instructions
+
+- It's important that you follow along and do this yourself. **Type it out - don't copy and paste.** You can't learn if you don't practice.
+- Take your time and make sure you understand each line of code as you type it out. If you are confused about what it does, where it goes, or why we use it:
+  - Take a breath and try re-reading the instructions/code/comments.
+  - Be a scientist - try breaking it down into pieces and running the code one piece at a time to see what it does.
+  - Ask trusty ol' Google.
+  - Ask a peer or me.
+
 ## Setup
 
-You can work from your project from last week, or start a new project. Either way, download the starter files from canvas and import it into your project. (There are some additional assets in there for this tutorial that weren't in last week's starter files.) There is a sample scene in there, with a player that uses the "MouseLook" script from last time.
+You can work from your project from last week, or start a new project. Either way, download the starter files from canvas and import it into your project. (There are some additional assets in there for this tutorial that weren't in last week's starter files.) There is a sample scene in there, with a player that uses the "MouseLook" script from last time. It should look something like this when you run it:
+
+![](./sample-scene.gif)
 
 ## Throwing
 
@@ -34,6 +45,10 @@ When we want something to act under the laws of physics, we need to give it a `R
 ![](./convex-demo.gif)
 
 If you hit play and that food drops to the floor and lands on it, you've got it set up correct. Once it works, turn it into a prefab by creating a folder called "Prefabs" and then dragging the food object from your scene into that folder. (If it asks if you want to create a new original prefab or a prefab variant, either work for this project.)
+
+It should look something like:
+
+![](./falling.gif)
 
 ### Instantiating and Throwing
 
@@ -78,9 +93,9 @@ void Update()
 }
 ```
 
-Since we've used the `[SerializeField]` attribute on the projectile field, we can fill in that field in the inspector. Drag and drop your food projectile prefab into the "projectile" field in the inspector. Test and run. Your food should just drop down in front of the camera. 
+Since we've used the `[SerializeField]` attribute on the projectile field, we can fill in that field in the inspector. Drag and drop your food projectile prefab into the "projectile" field in the inspector. Test and run. Your food should just drop down in front of the camera - check out your scene view and game view side-by-side to see it. 
 
-To make the food that we are spawning in fly forward, we need to talk to its `Rigidbody`. To use methods/fields/properties of another component, we need to use `GetComponent<>`:
+To make the food that we are spawning in fly forward, we need to talk to its `Rigidbody`. To use methods/fields/properties of another component, we need to use `GetComponent<>`. Let's update our code and add two more lines after instantiating:
 
 ```cs
 // Create an instance of the prefab in the world.
@@ -95,9 +110,15 @@ rb.AddForce(transform.forward * 20, ForceMode.Impulse);
 
 Here we apply a force in the camera's forward (postive z) direction. When we take a `Vector3` and multiply it by a number (`transform.forward * 20`) we are scaling that Vector3. E.g. if the original vector were (0, 0, 1), it would now be (0, 0, 10). [ForceMode](https://docs.unity3d.com/ScriptReference/ForceMode.html) controls how that force is applied. `ForceMode.Impulse` adds "an instant force impulse to the rigidbody, using its mass" so the projectile's mass will be taken into account.
 
-This is really close! Try turning up the force by increasing from 20 to 40. What happens? The food flies forward and falls, but doesn't really arc up like a ball would if you threw it in real life.
+This is really close! Try turning up the force by increasing from 20 to 40. What happens? The food flies forward and falls, but doesn't really arc up like a ball would if you threw it in real life. Let's modify that code:
 
 ```cs
+// Create an instance of the prefab in the world.
+GameObject projectileInstance = Instantiate<GameObject>(projectile, spawnPosition, randomRotation);
+
+// Get access to the instance's rigidbody.
+Rigidbody rb = projectileInstance.GetComponent<Rigidbody>();
+
 // Figure out a direction that is still pointing forward from the camera, but rotated upward by
 // 10 degrees.
 float upwardArcAngle = Mathf.Deg2Rad * 10;
@@ -107,7 +128,11 @@ Vector3 direction = Vector3.RotateTowards(transform.forward, Vector3.up, upwardA
 rb.AddForce(direction * 20, ForceMode.Impulse);
 ```
 
-Right now, our code has "magic numbers" that are hard-coded in the script. There's no way to adjust the force of the throw or the upward tilt of the throw without touching the code. Our script would be much improved if we could tweak those from the editor, which lets us (or gameplay designers) find the sweet spot for those settings:
+We should have something like:
+
+![](./throwing.gif)
+
+Right now, our code has "magic numbers" that are hard-coded in the script. There's no way to adjust the strength of the force of the throw (which where we multiply by 20) or the upward tilt of the throw (10 degrees) without touching the code. Our script would be much improved if we could tweak those from the editor, which lets us (or gameplay designers) find the sweet spot for those settings:
 
 ```cs
 public class Throw : MonoBehaviour
@@ -119,22 +144,35 @@ public class Throw : MonoBehaviour
     [SerializeField] private float upwardArcInDegrees = 10;
 
     // ... code omitted
+    // You need to now use those fields in place of the magic numbers we put in 
+    // the Update method.
 }
 ```
 
 Tweak those values from your inspector and find a set of values that feels good to you.
+
+### Continuous vs Discrete Collision Detection
+
+If you notice your projectiles flying through objects in your world, one reason that may happen is because your projectile's Rigidbody is set to discrete collision detection. A more computationally expensive, but more accurate way of doing collision detection is [continuous collision detection](https://docs.unity3d.com/Manual/ContinuousCollisionDetection.html). You can change your prefab to use continuous collision detection here:
+
+![](./ccd.png)
 
 ### Hitting Things
 
 Whew, now we can throw food around the world... but nothing happens if that projectile hits something in our scene. The goal is to knock things on the ground, so we need: 1) objects in the world to respond when hit with the projectile, 2) detect collisions when objects in the world hit the ground.
 
 To start, make sure to:
+
 - Create a floor (either a big plane, or using the floor models from Kenney).
 - Add a table to your scene, within throwing distance of the player.
 - Place a plant on top of the table.
 - Add a rigidbody to the plant and make sure its colliders is set to be convex.
 
-Test and run - you should now be able to throw things at the plants and have them fall off the table. Now, we can start scripting. Add a "CollisionTracker" script and put it on one of the plants. Inside of that script:
+When you configure the plant, you may have to set the plant to convex AND do the same process for all of its children:
+
+![](plant-setup.gif)
+
+Test and run - you should now be able to throw things at the plant and have it fall off the table. Now, we can start scripting. Add a "CollisionTracker" script and put it on the plant in your scene. Inside of that script:
 
 ```cs
 private void OnCollisionEnter(Collision collision)
@@ -165,7 +203,7 @@ Here's how we can create a new "Ground" tag and apply it to all our floor object
 
 ![](./tagging-ground.gif)
 
-Now if we modify that script to use a conditional:
+Don't forget to tag your rugs too! Now if we modify that script to use a conditional:
 
 ```cs
 private void OnCollisionEnter(Collision collision)
@@ -183,7 +221,9 @@ private void OnCollisionEnter(Collision collision)
 
 It should only print out when the plant hits the ground, and when it does, the plant should get destroyed and disappear from the world.
 
-Now, let's add a poof of smoke when the plant get destroyed. We're going to use a particle system for that. We'll learn more about them in Create with Code, but for now, look in the "Particles" folder with the "Prefabs" folder. Drag "CFX3_Hit_SmokePuff" into your scene to see it in action. When you are done, you can remove it from the scene.
+Now, let's add a poof of smoke when the plant gets destroyed. This feedback helps communicate what is going on to the player. We're going to use a particle system for that. We'll learn more about them in Create with Code, but for now, look in the "Particles" folder with the "Prefabs" folder. Drag "CFX3_Hit_SmokePuff" into your scene to see it in action. Note how, when you have that game object selected, a panel pops up that lets you play/pause the particle system to preview it. This particular particle system plays a single puff of smoke when it spawns in. When you are done, you can remove it from the scene.
+
+![](./particle-demo.gif)
 
 We want to modify our script to create that prefab at the place where the plant hit the ground:
 
@@ -205,17 +245,15 @@ private void OnCollisionEnter(Collision collision)
 }
 ```
 
-Make sure to set the "cloudParticles" field in the inspector. When you test and run, the plant should disappear into a puff of smoke. Duplicate the plant a few times in your scene, so that there are bunch on the table. Each should be able to be knocked off and destroyed now.
+Make sure to set the "Cloud Particles" field in the inspector. When you test and run, the plant should disappear into a puff of smoke. Duplicate the plant a few times in your scene, so that there are bunch on the table. Each should be able to be knocked off and destroyed now. Fill out your scene to your heart's desire - each object needs CollisionTracker.cs + convex colliders + rigidbody to work properly. 
 
 ## Extensions
 
 Now that you've got something basic working, implement the following:
 
 - When the player throws something, make it a random food instead of the same food every time.
-- Limit the number of projectiles the player can throw.
+  - See the homework challenge from week 2 and Create with Code Unit 2 for inspiration.
+- Give the player limited ammo - only let them throw six pieces of food. This will set us up so that the game can have a challenge - how many things can you destroy with limited ammo. Some hints:
+  - You'll need to keep track of how many times the player has thrown something somehow, how about a field?
+  - You'll need some kind of if statement to check if they've throw more than six things already.
 - (Optional, but recommended) Can you figure out how to restart the scene when the player presses "R"?
-
-## Next Time
-
-- Tracking the score.
-- Adding the user interface.
