@@ -132,7 +132,7 @@ We should have something like:
 
 ![](./throwing.gif)
 
-Right now, our code has "magic numbers" that are hard-coded in the script. There's no way to adjust the strength of the force of the throw (which where we multiply by 20) or the upward tilt of the throw (10 degrees) without touching the code. Our script would be much improved if we could tweak those from the editor, which lets us (or gameplay designers) find the sweet spot for those settings:
+Right now, our code has "magic numbers" that are hard-coded in the script. There's no way to adjust the strength of the force of the throw (which is where we multiply by 20) or the upward tilt of the throw (10 degrees) without touching the code. Our script would be much improved if we could tweak those from the editor, which lets us (or gameplay designers) find the sweet spot for those settings:
 
 ```cs
 public class Throw : MonoBehaviour
