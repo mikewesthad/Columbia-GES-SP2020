@@ -9,6 +9,10 @@ We're going to continue working on our "bowling" game that we started. Last time
 
 This will all involve applying old concepts in new ways, along with learning some new Unity concepts.
 
+The version of the game from the tutorial might look like:
+
+![](./demo-optimized.gif)
+
 ## Setup
 
 You can work from your project from last week, or start a new project. Either way, download the starter files from canvas and import it into your project. (There are some additional assets in there for this tutorial that weren't in last week's starter files.) There is a sample scene in there, with a player that uses the "MouseLook" script from last time.
@@ -215,4 +219,3 @@ Now that you've got something basic working, implement the following:
 
 - Tracking the score.
 - Adding the user interface.
-- Limiting
